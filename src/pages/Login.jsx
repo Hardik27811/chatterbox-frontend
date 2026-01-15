@@ -73,9 +73,9 @@ const Login = () => {
                         New to the community?{' '}
                         <button 
                             onClick={() => navigate('/register')}
-                            className="text-emerald-600 font-black hover:text-emerald-700 transition-colors"
+                            className="text-emerald-600 font-black hover:text-emerald-700 transition-colors  hover:underline underline-offset-4 "
                         >
-                            Create Chat ID
+                            Register
                         </button>
                     </p>
                 </div>
