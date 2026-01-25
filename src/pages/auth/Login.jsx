@@ -1,23 +1,35 @@
-import React, { useState } from 'react';
-import api from '../services/api';
+import  { useState } from 'react';
+// import {login  } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch,useSelector } from 'react-redux';
+import { loginUser } from '../../redux/authSlice';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
+    const dispatch = useDispatch();
+    const {loading,error} = useSelector((state)=> state.auth);
+    const navigate = useNavigate();
+
     const [email, setEmail] = useState('');
     const [password, setpassword] = useState('');
-    const navigate = useNavigate();
+    const [showPassword,setShowPassword] = useState(false);
+    // const [loading,setLoading] = useState(false);
+
+
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        try {
-            const res = await api.post('/auth/login', { email, password });
-            // Ensure you store the token so the chat sessions stay active
-            localStorage.setItem('token', res.data.token);
+        const res = await dispatch(loginUser({ email, password }));
+        // console.log(res);
+        
+        if(loginUser.fulfilled.match(res)){
+            // console.log("Success! Navigating...");
             navigate('/dashboard');
-        } catch (err) {
-            console.error(err.response?.data?.message);
-            alert(err.response?.data?.message || "Login failed");
+        }else{
+            // console.log("Match failed. Payload:", res.payload);
+            alert(res.payload || "Login failed");
         }
+
     }
 
     return (
@@ -52,24 +64,38 @@ const Login = () => {
                     {/* Password Input */}
                     <div className="relative">
                         <input 
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             placeholder="Password"
                             className="w-full bg-gray-50 px-6 py-4 rounded-2xl border-none focus:ring-2 focus:ring-emerald-500 outline-none transition-all placeholder:text-gray-400 text-gray-700"
                             value={password}
                             onChange={(e) => setpassword(e.target.value)}
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-emerald-500 transition-colors focus:outline-none"
+                        >
+                           {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
                     </div>
 
                     {/* Action Button */}
-                    <button className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all active:scale-95 mt-4 text-lg">
-                        Open Chats
+                    <button disabled={loading} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 transition-all active:scale-95 mt-4 text-lg">
+                        {loading ? "Signing in..." : "Open Chats"}
                     </button>
                 </form>
 
+
                 {/* Navigation Link */}
-                <div className="mt-10 text-center border-t border-gray-50 pt-6">
-                    <p className="text-gray-500 text-sm font-medium">
+                <div className="mt-2 text-center border-t border-gray-50 pt-6">
+                    <button 
+                            onClick={() =>navigate('/forgetpassword')}
+                            className="text-emerald-600  text-sm font-medium hover:text-emerald-700 transition-colors  hover:underline underline-offset-4 mb-2"
+                        >
+                            Forgot Password ?
+                        </button>
+                    <p className="text-gray-500 text-sm font-medium mt-10">
                         New to the community?{' '}
                         <button 
                             onClick={() => navigate('/register')}
