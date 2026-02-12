@@ -86,7 +86,7 @@ const Navbar = () => {
         
 
         {/* Logout - Bottom of Sidebar on Desktop */}
-        <div className="md:mt-auto md:flex w-full">
+        <div className="md:mt-auto md:flex md:w-full">
         <button 
           onClick={handleLogout}
           className="flex items-center p-3 rounded-2xl transition-all 
