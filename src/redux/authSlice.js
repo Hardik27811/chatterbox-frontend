@@ -10,6 +10,7 @@ export const loginUser = createAsyncThunk('/auth/login' , async(credentials,thun
     try {
         const data = await authService.login(credentials);
         // console.log("Thunk received from authService:", data);
+        localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('token',data.token);
         return data; // This becomes the "payload"
     } catch (error) {
@@ -21,6 +22,7 @@ export const loginUser = createAsyncThunk('/auth/login' , async(credentials,thun
 export const registerUser = createAsyncThunk('/auth/register',async(credentials,thunkauthAPI)=>{
     try {
         const data = await authService.register(credentials);
+        localStorage.setItem('user', JSON.stringify(data.user));
         localStorage.setItem('token',data.token);
         return data;
     } catch (error) {
@@ -39,7 +41,7 @@ export const forgotPassword = createAsyncThunk('/auth/forgotpassword',async(emai
 
 export const resetPassword = createAsyncThunk('/auth/resetpassword',async(resetData,thunkAPI)=>{
     try {
-        const res = await api.resetPassword(resetData);
+        const data = await api.resetPassword(resetData);
         return data.message;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Reset failed');
@@ -49,7 +51,7 @@ export const resetPassword = createAsyncThunk('/auth/resetpassword',async(resetD
 const authSlice = createSlice({
     name :'auth',
     initialState :{
-        user : null,
+        user: JSON.parse(localStorage.getItem('user')) || null,
         token : localStorage.getItem('token') || null ,
         loading : false,
         error : null,
@@ -64,6 +66,7 @@ const authSlice = createSlice({
             state.user = null;
             state.token = null;
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
         }
     },
     extraReducers : (builder)=>{
@@ -110,9 +113,9 @@ const authSlice = createSlice({
                     state.error = action.payload;
                 })
                 //reset
-                .addCase(resetPassword.pending,(action)=>{
-                    action.loading = true;
-                    action.error = null;
+                .addCase(resetPassword.pending,(state)=>{
+                    state.loading = true;
+                    state.error = null;
                 })
                 .addCase(resetPassword.fulfilled,(state,action)=>{
                     state.loading = false;

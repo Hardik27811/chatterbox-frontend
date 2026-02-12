@@ -2,6 +2,7 @@ import { createSlice , createAsyncThunk } from "@reduxjs/toolkit";
 import postService from "../services/postService";
 
 
+
 export const addUserPost = createAsyncThunk('/post/add',async(postData,thunkAPI)=>{
     try {
         const data = await postService.addPost(postData);
@@ -23,7 +24,9 @@ export const fetchAllPosts = createAsyncThunk('/post/getAll',async(_,thunkAPI)=>
 export const fetchMyPosts = createAsyncThunk('/post/getMyPosts',async(_,thunkAPI)=>{
     try {
         const data = await postService.getMyPosts();
-        return data.post;
+        console.log(data);
+        
+        return data.userposts;
     } catch (error) {
         return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to fetch YourPosts');
     }
@@ -65,6 +68,39 @@ export const likeUnlikeUserPost = createAsyncThunk('/post/likeUnlikePost',async(
     }
 })
 
+export const addUserComment = createAsyncThunk('/post/addComment',async(idData,thunkAPI)=>{
+    try {
+        const data = await postService.addComment(idData);
+        return data.post;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to add comment');
+    }
+})
+
+export const deleteUserComment = createAsyncThunk('/post/deleteComment',async(idData,thunkAPI)=>{
+    try {
+        const data = await postService.deleteComment(idData);
+        return data.post;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message || 'Failed to delete comment');
+    }
+})
+
+export const editUserComment = createAsyncThunk('/post/editComment',async(idData,thunkAPI)=>{
+    try {
+        const data = await postService.editComment(idData);
+        return data.post;
+    } catch (error) {
+        return thunkAPI.rejectWithValue(error.response?.data?.message);
+    }
+})
+
+const updatePostInArray = (array, updatedPost) => {
+    const index = array.findIndex((p) => p._id === updatedPost._id);
+    if (index !== -1) {
+        array[index] = updatedPost;
+    }
+};
 
 const postSlice = createSlice({
     name :"posts",
@@ -97,14 +133,12 @@ const postSlice = createSlice({
             .addCase(addUserPost.fulfilled, (state, action) => {
                 // Add the new post to the top of the feed immediately
                 state.posts.unshift(action.payload);
+                state.myPosts.unshift(action.payload);
             })
             //likeUnlike
-            .addCase(likeUnlikeUserPost.fulfilled,(state,action)=>{
-                const indx =state.posts.findIndex((p)=>p._id === action.payload._id );
-                if(indx !== -1){
-                //Update ONLY this specific post in the array
-                    state.posts[indx] = action.payload;
-                }
+            .addCase(likeUnlikeUserPost.fulfilled, (state, action) => {
+                updatePostInArray(state.posts, action.payload);   // Update Feed bucket
+                updatePostInArray(state.myPosts, action.payload); // Update Profile bucket
             })
             // Delete Post
             .addCase(deleteUserPost.fulfilled, (state, action) => {
@@ -113,10 +147,44 @@ const postSlice = createSlice({
                 state.myPosts = state.myPosts.filter((p) => p._id !== action.payload._id);
             })
             // My Posts
+            .addCase(fetchMyPosts.pending, (state) => {
+                    state.loading = true;
+                })
             .addCase(fetchMyPosts.fulfilled, (state, action) => {
                 state.loading = false;
-                state.myPosts = action.payload;
-            });
+                    state.myPosts = action.payload;
+                } 
+            )
+            .addCase(fetchMyPosts.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            //add Comment
+            .addCase(addUserComment.pending,(state)=>{
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addUserComment.fulfilled, (state, action) => {
+                state.loading = false;
+                updatePostInArray(state.posts, action.payload);   // Update Feed
+                updatePostInArray(state.myPosts, action.payload); // Update Profile
+            })
+            //delete comment
+           .addCase(deleteUserComment.fulfilled, (state, action) => {
+                state.loading = false;
+                updatePostInArray(state.posts, action.payload);   // Update Feed
+                updatePostInArray(state.myPosts, action.payload); // Update Profile
+            })
+            //editcomment
+             .addCase(editUserComment.pending,(state)=>{
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(editUserComment.fulfilled, (state, action) => {
+            state.loading = false;
+            updatePostInArray(state.posts, action.payload);   // Update Feed
+            updatePostInArray(state.myPosts, action.payload); // Update Profile
+        })
     }
 })
 

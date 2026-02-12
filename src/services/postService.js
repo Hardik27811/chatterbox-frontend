@@ -1,5 +1,4 @@
-import api  from "./api";
-
+ import api  from "./api";
 
 export const addPost = async(postData)=>{
     const res = await api.post('/post/add',postData);
@@ -16,23 +15,42 @@ export const getMyPosts = async()=>{
     return res.data;
 }
 
-export const getPostById = async(id)=>{
-    const res = await api.get(`/post/${id}`);
+export const getPostById = async(postId)=>{
+    const res = await api.get(`/post/${postId}`);
     return res.data;
 }
 
-export const updatePost = async(id)=>{
-    const res = await api.put(`/post/updatePost/${id}`);
+export const updatePost = async(data)=>{
+    const {postId , content} = data;
+    const res = await api.put(`/post/${postId}updatePost`,{content});
     return res.data;
 }
 
-export const deletePost = async(id)=>{
-    const res = await api.delete(`/post/deletePost/${id}`);
+export const deletePost = async(postId)=>{
+    const res = await api.delete(`/post/${postId}/deletePost`);
     return res.data;
 }
 
-export const likeUnlikePost = async(id)=>{
-    const res = await api.put(`/post/likeUnlikePost/${id}`);
+export const likeUnlikePost = async(postId)=>{
+    const res = await api.put(`/post/${postId}/likeUnlikePost`);
+    return res.data;
+}
+
+export const addComment = async(data)=>{
+    const {postId , text} = data;
+    const res = await api.post(`/post/${postId}/addComment`,{text});
+    return res.data;
+}
+
+export const deleteComment = async(data)=>{
+    const {postId,commentId} = data;
+    const res = await api.delete(`/post/${postId}/deleteComment/${commentId}`);
+    return res.data;
+}
+
+export const editComment = async(data)=>{
+    const {postId,commentId , text} = data;
+    const res = await api.put(`/post/${postId}/editComment/${commentId}`,{text});
     return res.data;
 }
 
@@ -43,7 +61,10 @@ const postService = {
     getPostById,
     updatePost,
     deletePost,
-    likeUnlikePost
+    likeUnlikePost,
+    addComment,
+    deleteComment,
+    editComment,
 }
 
 export default postService;
