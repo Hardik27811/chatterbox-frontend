@@ -86,15 +86,18 @@ const Navbar = () => {
         
 
         {/* Logout - Bottom of Sidebar on Desktop */}
-        <div className="hidden md:mt-auto md:flex w-full">
-          <button 
-            onClick={handleLogout}
-            className="flex items-center w-full p-3 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
-          >
-            <LogOut size={24} />
-            <span className="ml-4 font-bold hidden lg:block">Logout</span>
-          </button>
-        </div>
+        <div className="md:mt-auto md:flex w-full">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center p-3 rounded-2xl transition-all 
+                    text-gray-500 hover:text-red-500 hover:bg-red-50"
+        >
+          <LogOut size={24} />
+          <span className="ml-4 font-bold hidden lg:block">
+            Logout
+          </span>
+        </button>
+      </div>
 
       </div>
     </nav>
